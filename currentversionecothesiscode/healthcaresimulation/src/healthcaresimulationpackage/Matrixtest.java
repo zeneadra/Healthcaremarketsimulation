@@ -1,0 +1,48 @@
+package healthcaresimulationpackage;
+import java.util.ArrayList;
+
+public class Matrixtest {
+
+	public static void main(String[] args) {
+		ArrayList<ArrayList<Double>> protox=new ArrayList<ArrayList<Double>>();
+		ArrayList<Double> row1x=new ArrayList<Double>();
+		row1x.add((double) 1);
+		row1x.add((double) 2);
+		ArrayList<Double> row2x=new ArrayList<Double>();
+		row2x.add((double) 1);
+		row2x.add((double) 3);
+		protox.add(row1x);
+		protox.add(row2x);
+		ArrayList<ArrayList<Double>> protow=new ArrayList<ArrayList<Double>>();
+		ArrayList<Double> row1w=new ArrayList<Double>();
+		row1w.add((double) 1);
+		row1w.add((double) 0);
+		ArrayList<Double> row2w=new ArrayList<Double>();
+		row2w.add((double) 0);
+		row2w.add((double) 1);
+		protow.add(row1w);
+		protow.add(row2w);
+		Matrix X=new Matrix(protox);
+		Matrix W=new Matrix(protow);
+
+
+		ArrayList<ArrayList<Double>> protoy=new ArrayList<ArrayList<Double>>();
+		ArrayList<Double> row1y=new ArrayList<Double>();
+		row1y.add((double) 3);
+		ArrayList<Double> row2y=new ArrayList<Double>();
+		row2y.add((double) 6);
+		protoy.add(row1y);
+		protoy.add(row2y);
+		Matrix Y=new Matrix(protoy);
+		Matrix calc=X.gettranspose().rightmult(W).rightmult(X);
+		System.out.println(calc.M);
+		System.out.println("calc done");
+		Matrix example=calc.getsquaredim2inverse();
+		System.out.println("example matrix: "+example.M);
+		ArrayList<Double> params=Matrix.WLS(X, Y, W);
+		System.out.println(params);
+		System.out.println("square root of Double.MAX_VALUE"+Math.pow(-130900.0,2));
+
+	}
+
+}

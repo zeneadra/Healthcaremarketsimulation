@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;healthcaresimulationpackage.Matrixcalcs&apos; to &apos;Matrix&apos;&#x0D;&#x0A;- Original project: &apos;healthcaresimulation&apos;&#x0D;&#x0A;- Original element: &apos;healthcaresimulationpackage.Matrixcalcs&apos;&#x0D;&#x0A;- Renamed element: &apos;healthcaresimulationpackage.Matrix&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;Matrixcalcs&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;healthcaresimulationpackage{Matrixcalcs.java[Matrixcalcs" matchStrategy="1" name="Matrix" qualified="false" references="true" similarDeclarations="false" stamp="1593505502436" textual="false" version="1.0"/>
+</session>

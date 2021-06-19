@@ -1,0 +1,4 @@
+INDEX VERSION 1.131+C:\Users\miche\ecothesiscode\.metadata\.plugins\org.eclipse.jdt.core
+80053202.index
+2754360147.index
+1248545562.index

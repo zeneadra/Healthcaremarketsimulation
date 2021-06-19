@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item key="selection" value="nulloptionpenalty"/>
+		<item key="wrap" value="true"/>
+		<item key="casesensitive" value="false"/>
+		<item key="wholeword" value="false"/>
+		<item key="incremental" value="false"/>
+		<item key="isRegEx" value="false"/>
+		<list key="findhistory">
+			<item value="nulloptionpenalty"/>
+			<item value="patrenegotiate"/>
+			<item value="numvisitsperpatient"/>
+			<item value="profitmulitplier"/>
+			<item value="needmorepatients="/>
+			<item value="needmorepatients"/>
+			<item value="hospitalinfo"/>
+			<item value="processpatient"/>
+			<item value="baseET"/>
+			<item value="conseqinschanges"/>
+			<item value="choose"/>
+			<item value="numvisitstotal"/>
+			<item value="healthdraws"/>
+			<item value="rene"/>
+			<item value="hosrene"/>
+		</list>
+		<list key="replacehistory">
+			<item value="coverrate"/>
+			<item value="constructWLSWnoins"/>
+			<item value="constructWLSYnoins"/>
+			<item value="constructWLSXnoins"/>
+			<item value="stddiff"/>
+		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item key="DIALOG_X_ORIGIN" value="774"/>
+		<item key="DIALOG_Y_ORIGIN" value="432"/>
+		<item key="DIALOG_WIDTH" value="565"/>
+		<item key="DIALOG_HEIGHT" value="279"/>
+		<item key="DIALOG_FONT_NAME" value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI"/>
+	</section>
+	<section name="org.eclipse.ui.texteditor.GotoLineAction$GotoLineDialog_dialogBounds">
+		<item key="DIALOG_X_ORIGIN" value="452"/>
+		<item key="DIALOG_Y_ORIGIN" value="247"/>
+	</section>
+</section>

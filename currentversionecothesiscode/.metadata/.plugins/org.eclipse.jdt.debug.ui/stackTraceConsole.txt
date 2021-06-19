@@ -1,0 +1,3 @@
+double score=multipliers.get(0)*distances.get(hospital)
+					+multipliers.get(1)*expectedqualities.get(hospital)
+					+

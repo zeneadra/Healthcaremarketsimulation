@@ -1,0 +1,160 @@
+package healthcaresimulationpackage;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+/**
+ * still to be done insurer offer to hospitals, insurer decision to keep or not keep hospital 
+ * decision to keep patients
+ * @author miche
+ *
+ */
+public class Insurer extends Restrictableactor implements Deepcopiableactor {
+ private LinkedHashSet<Integer> patients;
+ private LinkedHashMap<Integer,Double> patientrates;//rates per patients
+ private LinkedHashSet<Integer> hospitals;
+ private LinkedHashMap<Integer,Double> prices; //the prices that the patient has to pay per hospital if they visit
+ private int insurernum;
+ private double rate;
+ private LinkedHashMap<Integer,Double> costs;// the costs(without taking the money the patient pays into account) that the insurer makes when a insured patient visits a hospital
+ private boolean fixedrate;
+ private double coverrate;
+ private double profit;
+ private double baseET;
+ private double profitmulitplier;
+ private LinkedHashMap<Integer,Double> ownETofcontractedpatients;
+	public Insurer(Government ingov,double baseETin) {
+		super(ingov);
+		// TODO Auto-generated constructor stub
+		patients=new LinkedHashSet<Integer>();
+		patientrates=new LinkedHashMap<Integer,Double>();
+		profit=0;
+		baseET=baseETin;
+		
+		
+	}
+
+	@Override
+	public Insurer deepcopyagent() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public LinkedHashSet<Integer> getpatients()
+	{
+		return patients;
+	}
+	public LinkedHashSet<Integer> gethospitals()
+	{
+		return hospitals;
+	}
+	public LinkedHashMap<Integer,Double> getprices()
+	{
+		return prices;
+	}
+	public double getbaserate()
+	{
+		return rate;
+	}
+	@Override
+	public int getID()
+	{
+		return insurernum;
+	}
+	//should be finished
+	/**
+	 * this function is only for the intial offer 
+	 * decisions to keep patient insured or subsequent offers are handled elsewhere
+	 * @param p
+	 * @return
+	 */
+	public double patientoffer(Patient p)
+	{
+		double offeredrate=-10;
+		double locET=0;
+		if(!gov.providesinfoonpattoins(insurernum,p.getID()))
+		{
+			locET=baseET;
+		}
+		else 
+		{
+			locET=gov.getpatientETinfospec(p.getID());
+		}
+		if(fixedrate&&gov.obligationinsurance(insurernum))
+		{
+			offeredrate=rate;
+			if(offeredrate>gov.getmaxrate())
+			{
+				offeredrate=gov.getmaxrate();
+			}
+		}
+		else if(fixedrate)
+		{
+			if(profitmulitplier*((this.getavgcosts()*(coverrate))/locET)<=rate)
+			{
+				offeredrate=rate;
+
+			}
+			if(offeredrate>gov.getmaxrate())
+			{
+				offeredrate=gov.getmaxrate();
+			}
+		}
+		else
+		{
+			offeredrate=profitmulitplier*((this.getavgcosts()*(coverrate))/locET);
+			
+			if(offeredrate>gov.getmaxrate())
+			{
+				offeredrate=gov.getmaxrate();
+			}
+		}
+		return offeredrate;
+	}
+
+	private double getavgcosts() {
+		double avgcosts=0;
+		for(Map.Entry<Integer,Double> hospitalcosts : costs.entrySet())
+		{
+			avgcosts=avgcosts+hospitalcosts.getValue();
+		}
+		avgcosts=avgcosts/costs.entrySet().size();
+		return avgcosts;
+	}
+
+	public void patientaccepted(Patient patient, double offer) {
+		patients.add(patient.getID());
+		patientrates.put(patient.getID(), offer);
+	}
+
+	public void addhospital(int hospital, double compensation) {
+		// TODO Auto-generated method stub
+		hospitals.add(hospital);
+		costs.put(hospital,compensation);
+		prices.put(hospital, profitmulitplier*(1-coverrate)*compensation);
+		
+	}
+	public void determineiffixed(boolean fixed)
+	{
+		fixedrate=fixed;
+	}
+	public void updateaftervisit(int p, double ET,int hos)
+	{
+		ownETofcontractedpatients.put(p,ET);
+		profit=profit-costs.get(hos)*coverrate;
+	}
+	public void updateprofiteveryperiod()
+	{
+		for(Entry<Integer,Double> p:patientrates.entrySet())
+		{
+			profit=profit+p.getValue();
+		}
+	}
+
+	public double determinecopayment(int hospital, double compensation) {
+		double copayment=compensation*(1/coverrate-1);
+		return copayment;
+	}
+}
+

@@ -1,0 +1,86 @@
+	public void calcscores()
+	{
+if(!recentlycalculated)
+		{
+			for(int hospital : setofhospitals){
+				double score=-Double.MAX_VALUE;
+				if(!insuredhospitals.contains(hospital))
+				{
+					if(estimatedcosts.get(hospital)>budget)
+					{
+						score=-multipliers.get(0)*distances.get(hospital)
+								+multipliers.get(1)*expectedqualities.get(hospital)
+								-multipliers.get(2)*estimatedcosts.get(hospital)
+								-multipliers.get(3)
+								+multipliers.get(4)*loyaltyfactors.get(hospital)
+								-multipliers.get(5)*estimatedstddiffs.get(hospital);
+//						if(multipliers.get(0)==3.2900256329914495)
+//						{
+//							System.out.println(1);
+//							System.out.println("score: "+score);
+//							System.out.println("after this the score terms in order");
+//							System.out.println(-multipliers.get(0)*distances.get(hospital));
+//							System.out.println(+multipliers.get(1)*expectedqualities.get(hospital));
+//							System.out.println(-multipliers.get(2)*estimatedcosts.get(hospital));
+//							System.out.println(-multipliers.get(3));
+//							System.out.println(+multipliers.get(4)*loyaltyfactors.get(hospital));
+//							System.out.println(-multipliers.get(5)*estimatedstddiffs.get(hospital));
+//						}
+					}
+					else
+					{
+						score=-multipliers.get(0)*distances.get(hospital)
+								+multipliers.get(1)*expectedqualities.get(hospital)
+								-multipliers.get(2)*estimatedcosts.get(hospital)
+								+multipliers.get(4)*loyaltyfactors.get(hospital)
+								-multipliers.get(5)*estimatedstddiffs.get(hospital);
+//						if(multipliers.get(0)==3.2900256329914495)
+//						{
+//							System.out.println(2);
+//							System.out.println("score: "+score);
+//							System.out.println("after this the score terms in order");
+//							System.out.println(-multipliers.get(0)*distances.get(hospital));
+//							System.out.println(+multipliers.get(1)*expectedqualities.get(hospital));
+//							System.out.println(-multipliers.get(2)*estimatedcosts.get(hospital));
+//							System.out.println(+multipliers.get(4)*loyaltyfactors.get(hospital));
+//							System.out.println(-multipliers.get(5)*estimatedstddiffs.get(hospital));
+//						}
+					}
+				}
+				else
+				{
+					if(setprices.get(hospital)>budget)
+					{
+
+						score=-multipliers.get(0)*distances.get(hospital)
+								+multipliers.get(1)*expectedqualities.get(hospital)
+								-multipliers.get(2)*setprices.get(hospital)
+								-multipliers.get(3)
+								+multipliers.get(4)*loyaltyfactors.get(hospital)
+								-multipliers.get(5)*estimatedstddiffs.get(hospital);
+						if(multipliers.get(0)==3.2900256329914495)
+						{
+							System.out.println(3);
+						}
+					}
+					else
+					{
+						score=-multipliers.get(0)*distances.get(hospital)
+								+multipliers.get(1)*expectedqualities.get(hospital)
+								-multipliers.get(2)*setprices.get(hospital)
+								+multipliers.get(4)*loyaltyfactors.get(hospital)
+								-multipliers.get(5)*estimatedstddiffs.get(hospital);
+						if(multipliers.get(0)==3.2900256329914495)
+						{
+							System.out.println(4);
+						}
+					}
+				}
+				currentscores.put(hospital,score);
+			}
+		}
+
+
+
+		recentlycalculated=true;
+	}

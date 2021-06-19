@@ -1,0 +1,487 @@
+package healthcaresimulationpackage;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Random;
+public class Patient extends Localizedagent implements Deepcopiableactor {
+
+	private double budget;
+	private Patientobjectivefactor objfac;
+	int patientnum;
+	private ArrayList<Integer> restrictioninfluence;
+	private LinkedHashSet<Integer> hospitalset;
+	private double chanceofhospital; //the chance of needing a hospital per period
+	//private double ET; //expected time until a hospital visit is needed equal to E(T
+// also expected number of timeperiod between visits including the eventual visit 
+	private int insurernum;
+	private double insurerrate;// amount paid to hospital per period
+	private double penalty;// penalty if denied entry by hospital for quality of hospital
+	private double  currentmoney;
+	private int numhospitalvisits;//number of hospitals visits this patient has had
+	private int unsucnumhospitalvisits;// number
+	private int tooexpensivenumhospitalvisits;//number of hospital visits that made the 
+	private int numperiodsinbudget;//the number of periods before the patient gets paid again
+	private double riskseeking;//how riskseeking a patient is 1 is riskneutral the higher the more riskseeking the lower the more conservative
+	private double hospitalchoicetremblinghandchance;// chance that a random different hospital from  the chosen hospital is picked
+	private double nohospitaloverwrite;//chance that when no hospital is chosen a random hospital is chosen
+	private Randomdraws tremblehand;// Random variable that determines if a patient goes to a hospital he does not prefer
+	private double deductibleamount;
+	private double deductiblepaid;
+	private int deductibleresetperiod;
+	private int deductibletime;
+	//public static int disillusioned;//TODO remove this later
+	//public static int totalvisits;//TODO remove this later
+	//public static int hos1vis;//TODO remove this later
+	public Patient(Location loc, double inbudget, 
+			Patientobjectivefactor initobjfac,
+			int patientnumber, Government gov,
+			LinkedHashSet<Integer> inhospitalset,
+			double inchanceofhospital, double inpenalty,
+			int innumperiodsinbudget,
+			double inriskseeking,
+			double inhospitalchoicetremblinghandchance,
+			double innohospitaloverwrite,
+			Randomdraws intremblehand) {
+		super(loc,gov);
+		budget=inbudget;
+		objfac=initobjfac;
+		patientnum=patientnumber;
+//		if(objfac.multipliers.get(0)==3.2900256329914495)
+//		{
+//			//System.out.println("this is the patient num: "+patientnum);
+//		}
+		hospitalset=inhospitalset;
+		restrictioninfluence=new ArrayList<Integer>();
+		for(int i=0;i<5;i++)
+		{
+			restrictioninfluence.add(0);
+		}
+		chanceofhospital=inchanceofhospital;
+		//ET=1/chanceofhospital;
+		insurernum=-1;
+		penalty=inpenalty;
+		insurerrate=0;
+		currentmoney=budget;
+		numhospitalvisits=0;
+		unsucnumhospitalvisits=0;
+		tooexpensivenumhospitalvisits=0;
+		numperiodsinbudget=innumperiodsinbudget;
+		riskseeking=inriskseeking;
+		hospitalchoicetremblinghandchance=inhospitalchoicetremblinghandchance;
+		nohospitaloverwrite=innohospitaloverwrite;
+		tremblehand=intremblehand;
+		this.setbudget(budget);
+		deductiblepaid=0;
+		deductibletime=0;
+		//disillusioned=0;
+		//totalvisits=0;
+		//hos1vis=0;
+	}
+	public Patient(Location loc, double inbudget, 
+			Patientobjectivefactor initobjfac,
+			int patientnumber, Government gov,
+			LinkedHashSet<Integer> inhospitalset,
+			double inchanceofhospital, double inpenalty, int ininsurernum, double ininsurerrate
+			,ArrayList<Integer> inrestrictioninfluence, double incurrentmoney, int innumhospitalvisits,
+			int inunsucnumhospitalvisits, int intooexpensivenumhospitalvisits,int innumperiodsinbudget,
+			double inriskseeking, double inhospitalchoicetremblinghandchance,
+			 double innohospitaloverwrite,
+			 Randomdraws intremblehand)
+	{
+		super(loc,gov);
+		budget=inbudget;
+		objfac=initobjfac;
+		patientnum=patientnumber;
+		hospitalset=inhospitalset;
+		restrictioninfluence=inrestrictioninfluence;
+		chanceofhospital=inchanceofhospital;
+		//ET=1/chanceofhospital;
+		insurernum=ininsurernum;
+		insurerrate=ininsurerrate;
+		penalty=inpenalty;
+		currentmoney=incurrentmoney;
+		numhospitalvisits=innumhospitalvisits;
+		unsucnumhospitalvisits=inunsucnumhospitalvisits;
+		tooexpensivenumhospitalvisits=intooexpensivenumhospitalvisits;
+		numperiodsinbudget=innumperiodsinbudget;
+		riskseeking=inriskseeking;
+		hospitalchoicetremblinghandchance=inhospitalchoicetremblinghandchance;
+		nohospitaloverwrite=innohospitaloverwrite;
+		tremblehand=intremblehand;
+		this.setbudget(budget);
+	}
+	/**
+	 * this function updates the objective function of the patient, the information is coming from the governement this can be called for all hospitals with the averages
+	 * @param allowedtoenter
+	 * @param performance
+	 * @param cost
+	 * @param hospital
+	 */
+	public void updatepatientaftervisit(boolean allowedtoenter,double performance, double cost, int hospital,boolean externalinformation )
+	{
+		if(allowedtoenter) {
+			objfac.update(performance,cost, hospital,externalinformation,false);
+			if(currentmoney<cost)
+			{
+				tooexpensivenumhospitalvisits = getTooexpensivenumhospitalvisits() + 1;
+			}
+		}
+		else
+		{
+			objfac.update(-penalty,cost, hospital,externalinformation,true);
+			if(!externalinformation)
+			{
+				unsucnumhospitalvisits = getUnsucnumhospitalvisits() + 1;
+			}
+		}
+		if(!externalinformation)
+		{
+			numhospitalvisits = getNumhospitalvisits() + 1;
+			if(!objfac.isinsured(hospital))
+			{
+				currentmoney=currentmoney-cost;
+			}
+			else if(deductiblepaid>=deductibleamount)
+			{
+				currentmoney=currentmoney-objfac.getprices().get(hospital);
+			}
+			else
+			{
+				if(deductibleamount-deductiblepaid-cost>0)
+				{
+					currentmoney=currentmoney-cost;
+					deductiblepaid=deductiblepaid+cost;
+				}
+				else 
+				{
+					currentmoney=currentmoney-deductibleamount+deductiblepaid-objfac.getprices().get(hospital);
+					deductiblepaid=deductibleamount;
+				}
+			}
+				double insurfactor=0;
+			if(insurernum>=0)
+			{
+				insurfactor=insurerrate;
+			}
+			//TODO to see relation between overal budget and budget per time period
+			objfac.setbudget(riskseeking*currentmoney/(numperiodsinbudget*chanceofhospital)-numperiodsinbudget*insurfactor);
+		
+		}
+	}
+	/**
+	 * get the best hospital that the patient can go to, if the patient with his current budget cannot go to any hospital in his view the function returns -1
+	 * @return
+	 */
+	public int getbesthospital()
+	{
+		//		LinkedHashMap<Integer,Double> possibleobjec=objfac.getscores();
+		//		int besthospital=-1;
+		//		double locmax=-Double.MAX_VALUE;
+		//		for(Map.Entry<Integer,Double> hospital : possibleobjec.entrySet())
+		//		{
+		//			if(hospital.getValue()>locmax)
+		//			{
+		//				locmax=hospital.getValue();
+		//				besthospital=hospital.getKey();
+		//			}
+		//		}
+		//		if(besthospital<0)
+		//		{
+		//			Loggers.messagelogger("Patient "+this.patientnum +" could not find a feasible hospital and has defaulted to hospital 0");
+		//			besthospital=0;
+		//		}
+		int besthospital=objfac.choosebestoption();
+		//totalvisits++;
+		boolean chancedhospitalchoice=false;
+		if(besthospital<0)
+		{
+			//disillusioned++;
+			//System.out.println(objfac.getscores());
+			if(tremblehand.draw()<nohospitaloverwrite)
+			{
+				chancedhospitalchoice=true;
+			}
+		}
+		else
+		{
+			if(tremblehand.draw()< hospitalchoicetremblinghandchance)
+			{
+				chancedhospitalchoice=true;
+			}
+		}
+		if(chancedhospitalchoice)
+		{
+			besthospital=tremblehand.randomselection(hospitalset);
+			//hos1vis=hos1vis+besthospital;
+			
+		}
+		return besthospital;
+	}
+	/**
+	 * 
+	 * @return
+	 */
+	public ArrayList<Double> getbesthospitalandvalue()
+	{
+		ArrayList<Double> besthosval= new ArrayList<Double>();
+		int hospital=objfac.choosebestoption();
+		double value=objfac.evaluatefunctionperelement(hospital);
+		//System.out.println("1 has a value of"+objfac.evaluatefunctionperelement(1));
+		besthosval.add((double) hospital);
+		besthosval.add(value);
+		return besthosval;
+	}
+	/**
+	 * 
+	 * @param insurer
+	 * @param price is the price per period the patient pays
+	 * @return
+	 */
+	// check if conditions work also make second one to check if still worth it.
+	public boolean acceptinsureroffer(Insurer insurer, double rate)
+	{
+		boolean accept=false;
+		//there are two conditions that determine if the patient accepts an insurers offer.
+		objfac.calcscores();
+		int besthospital=objfac.choosebestoption();
+		LinkedHashSet<Integer> hospitals=insurer.gethospitals();
+		LinkedHashMap<Integer, Double> prices=insurer.getprices();
+		double bestval=objfac.evaluatefunctionperelement(besthospital);
+		Patientobjectivefactor altobjfac=objfac.deepcopy();
+		altobjfac.setinsurance(hospitals, prices);
+		altobjfac.setbudget(riskseeking*budget/(numperiodsinbudget*chanceofhospital)-numperiodsinbudget*rate);
+		int altbesthospital=altobjfac.choosebestoption();
+		double altbestval=objfac.evaluatefunctionperelement(altbesthospital);
+//		if(riskseeking*budget/(numperiodsinbudget*chanceofhospital)-numperiodsinbudget*rate<budget&&budget>riskseeking*budget/(numperiodsinbudget*chanceofhospital)-numperiodsinbudget*insurerrate)
+//		{
+//			if(bestval-insurerrate*(ET-1)*objfac.getthirdmult()
+//					<altbestval-rate*(ET-1)*objfac.getthirdmult())
+//			{
+//				accept=true;
+//				
+//			}
+//		}
+//		else if(insurerrate*(ET-1)<budget)
+//		{
+//			if(bestval<altbestval-objfac.getfourthmult())
+//			{
+//				accept=true;
+//			}
+//		}
+//		else if(rate*(ET-1)<budget)
+//		{
+//			if(bestval-objfac.getfourthmult()<altbestval)
+//			{
+//				accept=true;
+//			}
+//		}
+//		else
+//		{
+			if(bestval<altbestval)
+			{
+				accept=true;
+			}
+//		}
+		if(accept||(gov.obligatedinsurance(patientnum)&&insurernum<0))
+		{
+			insurernum=insurer.getID();
+			insurerrate=rate;
+			objfac.setinsurance(hospitals, prices);
+		}
+		return accept;
+	} 
+	
+	public boolean checkifinsurancestillworthit()
+	{
+		boolean worthit=true;
+		if(insurernum<0||gov.obligatedinsurance(patientnum))
+		{
+			
+		}
+		else
+		{
+			//there are two conditions that determine if the patient accepts an insurers offer.
+			objfac.calcscores();
+			int besthospital=objfac.choosebestoption();
+			LinkedHashSet<Integer> hospitals=new LinkedHashSet<Integer>();
+			LinkedHashMap<Integer, Double> prices=new LinkedHashMap<Integer, Double>();
+			double bestval=objfac.evaluatefunctionperelement(besthospital);
+			Patientobjectivefactor altobjfac=objfac.deepcopy();
+			altobjfac.setinsurance(hospitals, prices);
+			altobjfac.setbudget(riskseeking*budget/(numperiodsinbudget*chanceofhospital));
+			int altbesthospital=altobjfac.choosebestoption();
+			double altbestval=objfac.evaluatefunctionperelement(altbesthospital);
+			if(bestval<altbestval)
+			{
+				worthit=false;
+			}
+			
+		}
+		return worthit;
+	}
+	public void setnullinsurer()
+	{
+		insurerrate=0;
+		insurernum=-1;
+		LinkedHashSet<Integer> hospitals=new LinkedHashSet<Integer>();
+		LinkedHashMap<Integer, Double> prices=new LinkedHashMap<Integer, Double>();
+		objfac.setinsurance(hospitals, prices);
+		
+	}
+	public void setpricesandinsuredhospitals(Insurer insurer, double rate)
+	{
+		LinkedHashSet<Integer> hospitals=insurer.gethospitals();
+		LinkedHashMap<Integer, Double> prices=insurer.getprices();
+		objfac.setinsurance(hospitals, prices);
+		insurernum=insurer.getID();
+		insurerrate=rate;
+
+	}
+	public double getcurrentmoney()
+	{
+		return currentmoney;
+	}
+	/**
+	 * governement 
+	 * @return
+	 */
+	public void processgovernementoffer()
+	{
+		if(gov.isinformedpat(patientnum))
+		{
+
+			for (Integer hospital : hospitalset)
+			{
+				if(gov.hashospitalinfo(hospital))
+				{
+					boolean penaltybool=false;
+					ArrayList<Double> hosinfo=gov.gethospitalinfo(hospital);
+					if(hosinfo.get(1)>budget)//TODO if the price is higher than the budget(check if this budget is correct)
+					{
+						penaltybool=true;
+					}
+					objfac.update(hosinfo.get(0), hosinfo.get(1), hospital, true, penaltybool);
+				}
+			}
+		}
+	}
+	public boolean needshospital(Random inrand )
+	{
+		double draw=inrand.nextDouble();
+		boolean needshosptial=false;
+		if(draw<=chanceofhospital)
+		{
+			needshosptial=true;
+		}
+		return needshosptial;
+	}
+	/**
+	 * note that the restrictions that do not directly affect the patients are not counted here.
+	 * it should also be noted that this is intra model and is not truely accurate.
+	 * it is used to measure the expected intervention influence as seen in this world
+	 * this can be used for policy making as measuring perceived invasiness
+	 */
+	@Override
+	public ArrayList<Integer> influenceduetorestrict()
+	{
+		return restrictioninfluence;
+	}
+	/**
+	 * deepcopyagent does not copy the restrictioninfluence field
+	 * TODO done
+	 */
+	@Override
+	public Patient deepcopyagent() {
+		ArrayList<Integer> copyrestrictioninfluence=new ArrayList<Integer>();
+		copyrestrictioninfluence.addAll(restrictioninfluence);
+		LinkedHashSet<Integer> hospitalsetcopy=new LinkedHashSet<Integer>();
+		for(int hospital:hospitalset) 
+		{
+			hospitalsetcopy.add(hospital);
+		}
+		/**
+		 * Patient(Location loc, double inbudget, 
+			Patientobjectivefactor initobjfac,
+			int patientnumber, Government gov,
+			LinkedHashSet<Integer> inhospitalset,
+			double inchanceofhospital, double inpenalty, int ininsurernum, double ininsurerrate
+			,ArrayList<Integer> inrestrictioninfluence, double incurrentmoney, int innumhospitalvisits,
+			int inunsucnumhospitalvisits, int intooexpensivenumhospitalvisits,int innumperiodsinbudget,
+			double inriskseeking)
+		 */
+		Patient patientcopy=new Patient(loc.deepcopy(), budget, objfac.deepcopy(), 
+				patientnum, gov.deepcopyagent(),hospitalsetcopy,chanceofhospital, penalty, insurernum,
+				insurerrate,copyrestrictioninfluence, currentmoney,numhospitalvisits,unsucnumhospitalvisits,
+				tooexpensivenumhospitalvisits,numperiodsinbudget,riskseeking,
+				hospitalchoicetremblinghandchance,
+				nohospitaloverwrite,
+				tremblehand.deepcopy());
+		return patientcopy;
+	} 
+	@Override
+	public int getID()
+	{
+		return patientnum;
+	}
+	public int getinsurer()
+	{
+		return insurernum;
+	}
+	public void setbudget(double budgetin)
+	{
+		budget=budgetin;
+		double insurfactor=0;
+		if(insurernum>=0)
+		{
+			insurfactor=insurerrate;
+		}
+		//TODO to see relation between overal budget and budget per time period
+		objfac.setbudget(riskseeking*budgetin/(numperiodsinbudget*chanceofhospital)-numperiodsinbudget*insurfactor);
+	}
+	public void updatecurrentmoneyperperiod()
+	{
+		numperiodsinbudget--;
+		deductibletime--;
+
+		if(insurernum>=0)
+		{
+			currentmoney=currentmoney-insurerrate;
+		}
+		if(numperiodsinbudget==0)
+		{
+			this.resetcurrentmoney();
+		}
+		if(deductibletime==0)
+		{
+			this.resetdeductible();
+		}
+	}
+	public void resetcurrentmoney()
+	{
+		currentmoney=budget;
+		double insurfactor=0;
+		if(insurernum>=0)
+		{
+			insurfactor=insurerrate;
+		}	
+		objfac.setbudget(riskseeking*currentmoney/(numperiodsinbudget*chanceofhospital)
+				-numperiodsinbudget*insurfactor);
+
+		
+	}
+	public void resetdeductible()
+	{
+		deductibletime=deductibleresetperiod;
+		deductiblepaid=0;
+	}
+	public int getNumhospitalvisits() {
+		return numhospitalvisits;
+	}
+	public int getUnsucnumhospitalvisits() {
+		return unsucnumhospitalvisits;
+	}
+	public int getTooexpensivenumhospitalvisits() {
+		return tooexpensivenumhospitalvisits;
+	}
+}

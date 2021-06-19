@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="healthcaresimulationpackage.Insurer"/>
+    <fullyQualifiedTypeName name="healthcaresimulationpackage.CSVreader"/>
+    <fullyQualifiedTypeName name="java.lang.Double"/>
+    <fullyQualifiedTypeName name="java.util.Iterator"/>
+    <fullyQualifiedTypeName name="java.lang.Math"/>
+    <fullyQualifiedTypeName name="java.io.File"/>
+    <fullyQualifiedTypeName name="java.util.LinkedHashSet"/>
+    <fullyQualifiedTypeName name="healthcaresimulationpackage.Matrix"/>
+    <fullyQualifiedTypeName name="org.apache.commons.math3.distribution.NormalDistribution"/>
+    <fullyQualifiedTypeName name="healthcaresimulationpackage.Loggers"/>
+    <fullyQualifiedTypeName name="java.util.LinkedHashMap"/>
+    <fullyQualifiedTypeName name="org.apache.commons.math3.distribution.ParetoDistribution"/>
+    <fullyQualifiedTypeName name="org.apache.commons.math3.random.StableRandomGenerator"/>
+    <fullyQualifiedTypeName name="org.apache.commons.math3.random.MersenneTwister"/>
+    <fullyQualifiedTypeName name="healthcaresimulationpackage.Randomdraws"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="java.lang.System"/>
+    <fullyQualifiedTypeName name="java.util.Random"/>
+</qualifiedTypeNameHistroy>
